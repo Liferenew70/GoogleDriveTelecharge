@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./favicon/favicon.ico" type="image/x-icon">
+    <title>Tutoriel Rclone pour Google Drive</title>
+    <style>
+        /* --- Styles Généraux --- */
+        :root {
+            --main-blue: #007BFF;
+            --light-blue: #e6f2ff;
+            --dark-blue: #0056b3;
+            --text-color: #333;
+            --background-color: #f4f7f9;
+            --white-color: #ffffff;
+            --border-color: #dee2e6;
+            --code-bg: #2d2d2d;
+            --code-text: #f8f8f2;
+            --success-bg: #d4edda;
+            --success-border: #c3e6cb;
+            --success-text: #155724;
+            --warning-bg: #fff3cd;
+            --warning-border: #ffeeba;
+            --warning-text: #856404;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.7;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* --- Conteneur Principal --- */
+        .container {
+            max-width: 900px;
+            margin: 2em auto;
+            background-color: var(--white-color);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            padding: 2em 3em;
+        }
+
+        /* --- Typographie --- */
+        h1, h2, h3 {
+            color: var(--main-blue);
+            margin-top: 1.5em;
+            margin-bottom: 0.8em;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            text-align: center;
+            border-bottom: 2px solid var(--light-blue);
+            padding-bottom: 0.5em;
+            margin-top: 0;
+        }
+
+        h2 {
+            font-size: 1.8em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.4em;
+        }
+
+        h3 {
+            font-size: 1.4em;
+            color: var(--dark-blue);
+            border-left: 4px solid var(--main-blue);
+            padding-left: 0.5em;
+        }
+        
+        p {
+            margin-bottom: 1em;
+        }
+
+        a {
+            color: var(--main-blue);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        a:hover {
+            color: var(--dark-blue);
+            text-decoration: underline;
+        }
+
+        /* --- Blocs de Code --- */
+        .code-container {
+            position: relative;
+            margin: 1.5em 0;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.5em;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.95em;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background-color: #555;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .code-container:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--main-blue);
+        }
+        
+        .copy-btn svg {
+            width: 16px;
+            height: 16px;
+            vertical-align: middle;
+        }
+
+        /* --- Listes Ordonnées --- */
+        ol {
+            padding-left: 2em;
+        }
+
+        li {
+            margin-bottom: 0.8em;
+        }
+        
+        li code {
+            background-color: var(--light-blue);
+            color: var(--dark-blue);
+            padding: 0.2em 0.5em;
+            border-radius: 4px;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+        }
+
+        /* --- Alertes / Callouts --- */
+        .alert {
+            padding: 1em 1.5em;
+            margin: 1.5em 0;
+            border-left-width: 5px;
+            border-left-style: solid;
+            border-radius: 8px;
+        }
+
+        .alert-warning {
+            background-color: var(--warning-bg);
+            border-color: var(--warning-border);
+            color: var(--warning-text);
+        }
+
+        .alert-success {
+            background-color: var(--success-bg);
+            border-color: var(--success-border);
+            color: var(--success-text);
+        }
+
+        .alert-success strong {
+            color: var(--success-text);
+        }
+
+        /* --- Boutons --- */
+        .btn {
+            display: inline-block;
+            background-image: linear-gradient(45deg, var(--main-blue) 0%, var(--dark-blue) 100%);
+            color: var(--white-color);
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-weight: bold;
+            text-align: center;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+        }
+
+        .btn:hover {
+            color: var(--white-color);
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+        }
+
+        .download-section {
+            text-align: center;
+            padding: 2em;
+            background-color: var(--light-blue);
+            border-radius: 8px;
+            margin-top: 2em;
+        }
+        
+        /* --- Section Vidéo --- */
+        .video-placeholder {
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            background-color: #e9ecef;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            color: #6c757d;
+            margin-top: 1.5em;
+        }
+        .video-placeholder-icon {
+            font-size: 3em;
+            margin-bottom: 0.2em;
+        }
+
+        /* --- Notification de copie --- */
+        #copy-notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #28a745;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 25px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.5s ease, bottom 0.5s ease;
+            font-size: 1em;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Tutoriel : Télécharger vos Dossiers Google Drive avec Rclone</h1>
+        </header>
+
+        <main>
+            <section id="intro">
+                <h2>Le problème de l'accès à Google Drive</h2>
+                <p>
+                    Le processus d'authentification de Google (OAuth2) est complexe mais indispensable pour garantir la sécurité de vos données. Pour accéder à vos fichiers <strong>privés</strong> sur Google Drive, Google exige une autorisation explicite de votre part via une page de connexion. C'est la seule manière réellement sécurisée. Les simples clés API ne permettent d'accéder qu'à des données publiques.
+                </p>
+                <p>
+                    <strong>Il n'existe pas d'alternative fiable pour télécharger vos fichiers privés sans cette autorisation.</strong>
+                </p>
+                <h3>La Solution la plus Efficace : Rclone</h3>
+                <p>
+                    Pour une solution robuste, capable de gérer de très gros volumes de données (50 Go et plus), qui respecte la structure de vos dossiers et qui peut être automatisée, le meilleur outil est de loin <strong>Rclone</strong>. C'est un programme puissant spécialisé dans le transfert de fichiers entre le cloud et votre machine locale. Il gère parfaitement les interruptions et optimise les transferts.
+                </p>
+            </section>
+            
+            <section id="prerequis">
+                <h2>Prérequis</h2>
+                <ul>
+                    <li><strong>Python :</strong> Nécessaire pour le script d'optimisation qui sera fourni. Si vous ne l'avez pas, vous pouvez suivre ce guide d'installation : <a href="http://sitevideopython.com" target="_blank">sitevideopython.com</a></li>
+                    <li><strong>Rclone :</strong> L'outil principal que nous allons configurer ci-dessous.</li>
+                </ul>
+            </section>
+
+            <section id="etape1">
+                <h2>Étape 1 : Installation et Configuration de Rclone (À faire une seule fois)</h2>
+                <p>
+                    Cette première étape consiste à autoriser Rclone à se connecter à votre compte Google Drive. C'est un processus guidé très simple.
+                </p>
+
+                <h3>1. Télécharger Rclone</h3>
+                <ol>
+                    <li>Rendez-vous sur la page de téléchargement officielle : <a href="https://rclone.org/downloads/" target="_blank" class="btn">Télécharger Rclone</a></li>
+                    <li>Téléchargez la version pour Windows (généralement "Intel/AMD - 64 Bit").</li>
+                    <li>C'est un fichier ZIP. Décompressez son contenu dans un dossier simple d'accès, par exemple <code>C:\rclone</code>.</li>
+                </ol>
+
+                <h3>2. Configurer la connexion Google Drive</h3>
+                <ol>
+                    <li>Ouvrez une invite de commande. Pour cela, tapez <code>cmd</code> dans la barre de recherche Windows et appuyez sur Entrée.</li>
+                    <li>Dans la fenêtre noire qui s'ouvre, naviguez vers le dossier où vous avez extrait Rclone. Si vous avez suivi notre conseil, tapez la commande suivante et validez avec Entrée :</li>
+                </ol>
+                <div class="code-container">
+                    <pre><code>cd C:\rclone</code></pre>
+                    <button class="copy-btn" title="Copier le code">
+                        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V8l-6-6zM8 21V9h8v12H8z"></path></svg>
+                    </button>
+                </div>
+
+                <p>Lancez maintenant l'outil de configuration de Rclone avec cette commande :</p>
+                <div class="code-container">
+                    <pre><code>rclone config</code></pre>
+                    <button class="copy-btn" title="Copier le code">
+                        <svg fill="currentColor" viewBox="0 0 20 20"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm-1 4H8c-1.1 0-1.99.9-1.99 2L6 21c0 1.1.89 2 1.99 2H19c1.1 0 2-.9 2-2V8l-6-6zM8 21V9h8v12H8z"></path></svg>
+                    </button>
+                </div>
+
+                <p><strong>Suivez attentivement les étapes dans l'invite de commande :</strong></p>
+                <ol>
+                    <li><code>n) New remote</code> -> Tapez <code>n</code> et appuyez sur Entrée.</li>
+                    <li><code>name></code> -> Donnez un nom simple à votre connexion, par exemple <code>MonGoogleDrive</code>, et appuyez sur Entrée.</li>
+                    <li><code>Storage></code> -> Cherchez "Google Drive" dans la liste. Tapez le numéro correspondant (par ex: <code>22</code>) et appuyez sur Entrée.</li>
+                    <li><code>client_id></code> -> <strong>Laissez vide</strong>, appuyez simplement sur Entrée.</li>
+                    <li><code>client_secret></code> -> <strong>Laissez vide</strong>, appuyez simplement sur Entrée.</li>
+                    <li><code>scope></code> -> Tapez <code>1</code> pour un accès complet à tous les fichiers et appuyez sur Entrée.</li>
+                    <li><code>service_account_file></code> -> <strong>Laissez vide</strong>, appuyez sur Entrée.</li>
+                    <li><code>Edit advanced config?</code> -> Tapez <code>n</code> (non) et appuyez sur Entrée.</li>
+                    <li><code>Use auto config?</code> -> Tapez <code>y</code> (oui) et appuyez sur Entrée.</li>
+                </ol>
+                
+                <div class="alert alert-warning">
+                    <strong>🚨 Attention :</strong> À ce moment, votre navigateur web va s'ouvrir sur une page de connexion Google. Connectez-vous avec le compte Google Drive contenant les fichiers à télécharger, puis cliquez sur <strong>"Autoriser"</strong> pour permettre à Rclone d'accéder à vos fichiers en votre nom.
+                </div>
+                
+                <p>Une fois l'autorisation validée, retournez à l'invite de commande pour terminer :</p>
+                <ol start="10">
+                    <li><code>Configure this as a Shared Drive (Team Drive)?</code> -> Tapez <code>n</code> (non) et appuyez sur Entrée.</li>
+                    <li><code>y) Yes this is OK</code> -> Confirmez en tapant <code>y</code> et appuyez sur Entrée.</li>
+                    <li><code>q) Quit config</code> -> Tapez <code>q</code> pour quitter la configuration.</li>
+                </ol>
+                
+                <div class="alert alert-success">
+                    <strong>✅ C'est terminé !</strong> Votre connexion est authentifiée et enregistrée de manière sécurisée. Vous n'aurez plus jamais à refaire cette configuration.
+                </div>
+            </section>
+            
+            <section id="etape2">
+                <h2>Étape 2 : Le Téléchargement Automatisé</h2>
+                <p>
+                    Maintenant que Rclone est configuré, tout est prêt. Nous n'allons pas utiliser une simple commande, mais un pack complet contenant :
+                </p>
+                <ul>
+                    <li><strong>Un script Batch (.bat) intelligent</strong> pour vous guider.</li>
+                    <li><strong>Un script Python d'optimisation</strong> pour assurer les meilleures performances.</li>
+                    <li>Le dossier <strong>Rclone</strong> que vous avez déjà utilisé (pour plus de simplicité).</li>
+                </ul>
+                <p>
+                    Ce pack vous permettra de lancer le téléchargement en double-cliquant sur un fichier, en vous demandant simplement le dossier source et la destination.
+                </p>
+
+                <div class="download-section">
+                    <h3>Télécharger le Pack Complet</h3>
+                    <p>Cliquez sur le bouton ci-dessous pour télécharger le fichier ZIP contenant tous les outils nécessaires.</p>
+                    <a href="https://drive.google.com/file/d/1DEGiMU5Y5JlqPXGBCWSZv8OG6r16Divo/view?usp=sharing" target="_blank" class="btn" download="Rclone.rar" title="Télécharger tous les fichiers qu'il faut en un clic">🚀 Télécharger le Pack (rclone + scripts)</a>
+                </div>
+            </section>
+
+            <section id="video">
+                <h2>Démonstration Vidéo</h2>
+                <p>
+                    Pour vous guider visuellement, voici une vidéo qui récapitule toutes les étapes, de la configuration de Rclone à l'utilisation du script de téléchargement.
+                </p>
+                <div class="video-placeholder">
+                    <div class="video-placeholder-icon">🎬</div>
+                    <div>
+                        <strong>Votre lecteur vidéo apparaîtra ici.</strong><br>
+                        Collez le code d'intégration de votre vidéo Vimeo dans le code HTML à cet emplacement.
+                    </div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Notification de copie -->
+    <div id="copy-notification">Code copié avec succès !</div>
+
+    <footer style="
+  background: linear-gradient(to right, #007BFF, #e6f2ff);
+  padding: 30px 20px;
+  border-radius: 12px;
+  text-align: center;
+  font-family: Arial, sans-serif;
+  color: #fff;
+  margin-top: 40px;
+">
+
+  <div style="
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 30px;
+    margin-bottom: 20px;
+  ">
+    <!-- WhatsApp -->
+    <a href="https://wa.me/+2250595762779?text=Bonjour" target="_blank" style="
+      display: flex;
+      align-items: center;
+      color: #25D366;
+      background: #fff;
+      padding: 10px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.2s;
+    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <svg style="margin-right:8px;" width="24" height="24" fill="currentColor" viewBox="0 0 32 32">
+        <path d="M16 3C9.373 3 4 8.373 4 15c0 2.385.668 4.66 1.934 6.662L4 29l7.505-1.958A12.94 12.94 0 0 0 16 27c6.627 0 12-5.373 12-12S22.627 3 16 3zM16 25c-1.97 0-3.89-.52-5.56-1.51l-.39-.23-4.46 1.16 1.19-4.34-.25-.41A9.96 9.96 0 0 1 6 15c0-5.52 4.48-10 10-10s10 4.48 10 10-4.48 10-10 10z"/>
+      </svg>
+      WhatsApp
+    </a>
+
+    <!-- Gmail -->
+    <a href="mailto:es2iprompter@gmail.com" target="_blank" style="
+      display: flex;
+      align-items: center;
+      color: #EA4335;
+      background: #fff;
+      padding: 10px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.2s;
+    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <svg style="margin-right:8px;" width="24" height="24" fill="currentColor" viewBox="0 0 32 32">
+        <path d="M27 7H5c-1.104 0-2 .896-2 2v14c0 1.104.896 2 2 2h22c1.104 0 2-.896 2-2V9c0-1.104-.896-2-2-2zm0 2v.511l-11 7.334-11-7.334V9h22zm0 14H5V11.489l10.447 6.96a1 1 0 0 0 1.106 0L27 11.489V23z"/>
+      </svg>
+      Gmail
+    </a>
+
+    <!-- Telegram -->
+    <a href="https://t.me/Joker_smiler" target="_blank" style="
+      display: flex;
+      align-items: center;
+      color: #0088cc;
+      background: #fff;
+      padding: 10px 16px;
+      border-radius: 30px;
+      text-decoration: none;
+      font-weight: 600;
+      transition: transform 0.2s;
+    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      <svg style="margin-right:8px;" width="24" height="24" fill="currentColor" viewBox="0 0 32 32">
+        <path d="M16 3C8.268 3 2 9.268 2 17c0 7.732 6.268 14 14 14s14-6.268 14-14c0-7.732-6.268-14-14-14zm6.93 10.36l-2.72 12.86c-.21.95-.77 1.18-1.56.74l-4.32-3.19-2.08 2c-.23.23-.43.43-.88.43l.31-4.41 8.02-7.24c.35-.31-.08-.48-.54-.17l-9.91 6.24-4.27-1.34c-.93-.29-.95-.93.19-1.38l16.72-6.44c.78-.29 1.45.19 1.2 1.37z"/>
+      </svg>
+      Telegram
+    </a>
+  </div>
+
+  <p style="color: white; font-size: 0.95em; margin-top: 10px;">
+    &copy; Tous droits réservés à <strong>jadsmith</strong>
+  </p>
+</footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const copyButtons = document.querySelectorAll('.copy-btn');
+            const notification = document.getElementById('copy-notification');
+
+            copyButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const pre = button.previousElementSibling;
+                    const code = pre.querySelector('code');
+                    
+                    if (navigator.clipboard) {
+                        navigator.clipboard.writeText(code.innerText).then(() => {
+                            showNotification();
+                        }).catch(err => {
+                            alert('Erreur lors de la copie.');
+                            console.error('Failed to copy: ', err);
+                        });
+                    } else {
+                        // Fallback pour les anciens navigateurs
+                        const textArea = document.createElement('textarea');
+                        textArea.value = code.innerText;
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        try {
+                            document.execCommand('copy');
+                            showNotification();
+                        } catch (err) {
+                            alert('Erreur lors de la copie.');
+                            console.error('Fallback: Oops, unable to copy', err);
+                        }
+                        document.body.removeChild(textArea);
+                    }
+                });
+            });
+
+            let notificationTimeout;
+            function showNotification() {
+                // Si une notif est déjà visible, on la réinitialise
+                clearTimeout(notificationTimeout);
+                notification.style.opacity = '0';
+                notification.style.bottom = '0px';
+
+                // Afficher la nouvelle notification
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                    notification.style.bottom = '20px';
+                }, 50);
+
+                // Masquer après 2 secondes
+                notificationTimeout = setTimeout(() => {
+                    notification.style.opacity = '0';
+                    notification.style.bottom = '0px';
+                }, 2000);
+            }
+        });
+    </script>
+
+</body>
+</html>
